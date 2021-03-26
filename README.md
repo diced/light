@@ -32,6 +32,7 @@ And run the executable found in `target/release/light`
 Provided there is a `light.example.toml` which you should rename to `light.toml`. All values do have [default values](#default-config-values).
 
 # default config values
+These default values should be perfect to run in docker as you only need to run one command (docker compose) and you will have it running.
 
 ```toml
 host = "0.0.0.0:8000"
