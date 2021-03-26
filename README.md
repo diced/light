@@ -25,6 +25,10 @@ Build `light` by just running
 cargo build --release
 ```
 
+# prebuilt binaries
+
+Prebuilt binaries can be found in GitHub Releases. Only for linux.
+
 And run the executable found in `target/release/light`
 
 # configuration
@@ -32,6 +36,7 @@ And run the executable found in `target/release/light`
 Provided there is a `light.example.toml` which you should rename to `light.toml`. All values do have [default values](#default-config-values).
 
 # default config values
+
 These default values should be perfect to run in docker as you only need to run one command (docker compose) and you will have it running.
 
 ```toml
