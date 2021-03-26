@@ -4,8 +4,8 @@ use std::{error::Error, fs::*};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ParsableConfig {
   pub host: Option<String>,
-  pub postgres_uri: String,
-  pub admin_key: String,
+  pub postgres_uri: Option<String>,
+  pub admin_key: Option<String>,
   pub uploads_dir: Option<String>,
   pub uploads_route: Option<String>,
   pub token_length: Option<usize>,
@@ -25,14 +25,16 @@ pub struct Config {
 
 impl Config {
   pub fn parse() -> Result<Self, Box<dyn Error>> {
-    let content = read_to_string("light.toml")?;
+    let content = read_to_string("light.toml").unwrap_or(String::from(""));
     let decoded: ParsableConfig = toml::from_str(&content)?;
     Ok(Config {
       host: decoded
         .host
         .unwrap_or_else(|| String::from("0.0.0.0:8000")),
-      postgres_uri: decoded.postgres_uri,
-      admin_key: decoded.admin_key,
+      postgres_uri: decoded.postgres_uri
+        .unwrap_or_else(|| String::from("postgresql://light:light@postgres/light")),
+      admin_key: decoded.admin_key
+      .unwrap_or_else(|| String::from("1234")),
       uploads_dir: decoded
         .uploads_dir
         .unwrap_or_else(|| String::from("./uploads")),
