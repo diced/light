@@ -1,3 +1,4 @@
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fs::*};
 
@@ -25,7 +26,18 @@ pub struct Config {
 
 impl Config {
   pub fn parse() -> Result<Self, Box<dyn Error>> {
-    let content = read_to_string("light.toml").unwrap_or(String::from(""));
+    debug!("trying to read light.toml");
+    let content = match read_to_string("light.toml") {
+      Ok(d) => {
+        info!("found a light.toml: using values & default values");
+        d
+      },
+      Err(_) => {
+        info!("couldn't find a light.toml: using default values");
+        "".to_string()
+      }
+    };
+
     let decoded: ParsableConfig = toml::from_str(&content)?;
     Ok(Config {
       host: decoded
@@ -34,7 +46,7 @@ impl Config {
       postgres_uri: decoded.postgres_uri
         .unwrap_or_else(|| String::from("postgresql://light:light@postgres/light")),
       admin_key: decoded.admin_key
-      .unwrap_or_else(|| String::from("1234")),
+        .unwrap_or_else(|| String::from("1234")),
       uploads_dir: decoded
         .uploads_dir
         .unwrap_or_else(|| String::from("./uploads")),

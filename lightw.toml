@@ -1,3 +1,0 @@
-postgres_uri = "postgresql://light:light@postgres/light"
-admin_key = "1234"
-host = "0.0.0.0:8000"

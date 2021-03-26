@@ -36,7 +36,9 @@ impl Postgres {
 
   pub async fn create_user(&self, name: &str) -> LightPgResult<LightUser> {
     match self.user_exists(name).await.expect("exist not happen") {
-      Some(_) => Err(LightError(LightErrorType::UserExists)),
+      Some(_) => Err(LightError {
+        r#type: LightErrorType::UserExists
+      }),
       None => {
         let user = LightUser::new(name);
 

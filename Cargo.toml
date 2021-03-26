@@ -14,5 +14,10 @@ futures = "0.3.13"
 
 rand = "0.8.3"
 
+simple_logger = "1.11.0"
+log = "0.4.14"
+
 serde = "1.0.125"
 toml = "0.5.8"
+bytes = "1.0.1"
+
