@@ -1,0 +1,7 @@
+host = "0.0.0.0:8000"
+postgres_uri = "postgresql://light:light@postgres/light"
+admin_key = "1234"
+uploads_dir = "./uploads"
+uploads_route = "/i"
+token_length = 12
+file_length = 5
