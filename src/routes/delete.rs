@@ -1,12 +1,12 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, HttpResponse};
 use log::{debug, info};
 
-use crate::{LightState, LightError, LightErrorType};
+use crate::{LightError, LightErrorType, LightState};
 
 pub async fn delete(
   req: web::HttpRequest,
   params: web::Path<String>,
-  state: web::Data<LightState>,
+  state: web::Data<LightState>
 ) -> Result<HttpResponse, LightError> {
   let auth_header = req.headers().get("authorization");
   let auth = match auth_header.clone() {
@@ -15,12 +15,12 @@ pub async fn delete(
       .pg
       .check_token(value.to_str().expect("couldn't str auth"))
       .await
-      .unwrap(),
+      .unwrap()
   };
 
   if !auth {
     return Err(LightError {
-      r#type: LightErrorType::AuthFailed,
+      r#type: LightErrorType::AuthFailed
     });
   }
 
@@ -30,7 +30,9 @@ pub async fn delete(
     .await
     .expect("no user found");
 
-  let some_image = state.pg.get_image(params.clone(), user)
+  let some_image = state
+    .pg
+    .get_image(params.clone(), user)
     .await
     .expect("couldn't get images");
 
@@ -43,7 +45,8 @@ pub async fn delete(
   let image = some_image.expect("couldn't get image");
 
   debug!("attempting to delete image {}", image.file);
-  std::fs::remove_file(format!("{}/{}", state.config.uploads_dir, image.file)).expect("couldn't remove file");
+  std::fs::remove_file(format!("{}/{}", state.config.uploads_dir, image.file))
+    .expect("couldn't remove file");
   state.pg.delete_image(image.clone()).await;
   info!("to deleted image {}", image.file);
 

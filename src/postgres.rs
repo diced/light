@@ -1,16 +1,16 @@
 use tokio_postgres::{
   types::{Json, ToSql},
-  Client, NoTls, Row,
+  Client, NoTls, Row
 };
 
 use crate::{
   model::{LightImage, LightUser},
-  LightError, LightErrorType, LightPgResult, LightResult,
+  LightError, LightErrorType, LightPgResult, LightResult
 };
 
 #[derive(Debug)]
 pub struct Postgres {
-  client: Client,
+  client: Client
 }
 
 impl Postgres {
@@ -29,7 +29,7 @@ impl Postgres {
   pub async fn query(
     &self,
     statement: &str,
-    params: &[&(dyn ToSql + Sync)],
+    params: &[&(dyn ToSql + Sync)]
   ) -> LightResult<Vec<Row>> {
     Ok(self.client.query(statement, params).await?)
   }
@@ -45,7 +45,7 @@ impl Postgres {
         self
           .query(
             "INSERT INTO light_users (data) VALUES ($1)",
-            &[&Json::<LightUser>(user.clone())],
+            &[&Json::<LightUser>(user.clone())]
           )
           .await
           .expect("couldn't query");
@@ -55,20 +55,59 @@ impl Postgres {
     }
   }
 
+  pub async fn delete_user(&self, name: &str) -> LightPgResult<LightUser> {
+    match self.user_exists(name).await.expect("exist not happen") {
+      None => Err(LightError {
+        r#type: LightErrorType::UserExists
+      }),
+      Some(user) => {
+        self
+          .query(
+            "DELETE FROM light_users WHERE data->'name' @> $1",
+            &[&Json::<String>(user.clone().name)]
+          )
+          .await
+          .expect("couldn't query");
+
+        Ok(user)
+      }
+    }
+  }
+
+  pub async fn regen_user(&self, name: &str) -> LightPgResult<LightUser> {
+    match self.user_exists(name).await.expect("exist not happen") {
+      None => Err(LightError {
+        r#type: LightErrorType::UserExists
+      }),
+      Some(user) => {
+        let new_user = LightUser::new(user.clone().name);
+        self
+          .query(
+            "UPDATE light_users SET data = $1 WHERE data->'name' @> $2",
+            &[&Json::<LightUser>(new_user.clone()), &Json::<String>(name.into())]
+          )
+          .await
+          .expect("couldn't query");
+
+        Ok(new_user)
+      }
+    }
+  }
+
   pub async fn create_image(
     &self,
     filename: impl Into<String>,
-    user: LightUser,
+    user: LightUser
   ) -> LightPgResult<LightImage> {
     let image = LightImage {
       file: filename.into(),
-      user: user.name,
+      user: user.name
     };
 
     self
       .query(
         "INSERT INTO light_images (data) VALUES ($1)",
-        &[&Json::<LightImage>(image.clone())],
+        &[&Json::<LightImage>(image.clone())]
       )
       .await
       .expect("couldn't query");
@@ -79,49 +118,46 @@ impl Postgres {
   pub async fn get_image(
     &self,
     filename: impl Into<String>,
-    user: LightUser,
+    user: LightUser
   ) -> LightPgResult<Option<LightImage>> {
     let res = self
       .query(
         "SELECT (data) FROM light_images WHERE data->'file' @> $1 AND data->'user' @> $2",
-        &[&Json::<String>(filename.into()), &Json::<String>(user.name)],
+        &[&Json::<String>(filename.into()), &Json::<String>(user.name)]
       )
       .await
       .expect("couldn't query");
 
-      if res.len() >= 1 {
-        let col: Json<LightImage> = res.get(0).expect("").get(0);
-  
-        Ok(Some(col.0))
-      } else {
-        Ok(None)
-      }
+    if res.len() >= 1 {
+      let col: Json<LightImage> = res.get(0).expect("").get(0);
+
+      Ok(Some(col.0))
+    } else {
+      Ok(None)
+    }
   }
 
-  pub async fn image_exists(
-    &self,
-    filename: impl Into<String>
-  ) -> LightPgResult<bool> {
+  pub async fn image_exists(&self, filename: impl Into<String>) -> LightPgResult<bool> {
     let res = self
       .query(
         "SELECT (data) FROM light_images WHERE data->'file' @> $1",
-        &[&Json::<String>(filename.into())],
+        &[&Json::<String>(filename.into())]
       )
       .await
       .expect("couldn't query");
 
-      if res.len() >= 1 {
-        Ok(true)
-      } else {
-        Ok(false)
-      }
+    if res.len() >= 1 {
+      Ok(true)
+    } else {
+      Ok(false)
+    }
   }
 
   pub async fn delete_image(&self, image: LightImage) {
     self
       .query(
         "DELETE FROM light_images WHERE data->'file' @> $1 AND data->'user' @> $2",
-        &[&Json::<String>(image.file), &Json::<String>(image.user)],
+        &[&Json::<String>(image.file), &Json::<String>(image.user)]
       )
       .await
       .expect("couldn't query");
@@ -131,7 +167,7 @@ impl Postgres {
     let res = self
       .query(
         "SELECT (data) FROM light_users WHERE data->'name' @> $1",
-        &[&Json::<String>(name.into())],
+        &[&Json::<String>(name.into())]
       )
       .await?;
 
@@ -148,7 +184,7 @@ impl Postgres {
     let res = self
       .query(
         "SELECT * FROM light_users WHERE data->'auth' @> $1",
-        &[&Json::<String>(token.into())],
+        &[&Json::<String>(token.into())]
       )
       .await?;
 
@@ -163,7 +199,7 @@ impl Postgres {
     let res = self
       .query(
         "SELECT (data) FROM light_users WHERE data->'auth' @> $1",
-        &[&Json::<String>(token.into())],
+        &[&Json::<String>(token.into())]
       )
       .await
       .expect("couldn't get user");

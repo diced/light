@@ -1,8 +1,7 @@
 use std::{error, fmt, sync::Arc};
 
 use postgres::Postgres;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 mod config;
 pub mod model;
@@ -18,7 +17,7 @@ pub type LightWebResult<T> = actix_web::Result<T, Box<dyn error::Error + Send + 
 #[derive(Debug)]
 pub struct LightState {
   pub pg: Arc<Postgres>,
-  pub config: Config,
+  pub config: Config
 }
 
 #[derive(Debug, Clone)]
@@ -32,7 +31,7 @@ pub enum LightErrorType {
 
 #[derive(Debug, Clone)]
 pub struct LightError {
-  pub r#type: LightErrorType,
+  pub r#type: LightErrorType
 }
 
 impl fmt::Display for LightError {
@@ -48,7 +47,6 @@ impl fmt::Display for LightError {
     write!(f, "{}", msg)
   }
 }
-
 
 impl error::Error for LightError {}
 impl actix_web::error::ResponseError for LightError {}

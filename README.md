@@ -82,9 +82,11 @@ Files are located at `/i/{file}` by default, yet you can change `/i` to anything
 
 ## api routes
 
-| **Route**                   | **Method** | **Body Type** (Only on POST) |
-| --------------------------- | ---------- | ---------------------------- |
-| /upload                     | POST       | multipart/form-data          |
-| /api/create_user            | POST       | application/json             |
-| /{upload view route}/{file} | GET        |                              |
-| /{upload view route}/{file} | DELETE     |                              |
+| **Route**                   | **Method** | **Body Type** (Only on POST) | **Description**    |
+| --------------------------- | ---------- | ---------------------------- | ------------------ |
+| /upload                     | POST       | multipart/form-data          | Upload a file      |
+| /user                       | POST       | application/json             | Create a user      |
+| /user                       | DELETE     | application/json             | Delete a user      |
+| /user                       | PATCH      | application/json             | Regen a user token |
+| /{upload view route}/{file} | GET        |                              | Get file           |
+| /{upload view route}/{file} | DELETE     |                              | Delete a file      |

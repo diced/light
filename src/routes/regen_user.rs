@@ -3,7 +3,7 @@ use log::info;
 
 use crate::{model::UserRequest, LightError, LightErrorType, LightState};
 
-pub async fn create_user(
+pub async fn regen_user(
   req: HttpRequest,
   data: web::Json<UserRequest>,
   state: web::Data<LightState>
@@ -16,14 +16,15 @@ pub async fn create_user(
           r#type: LightErrorType::AuthFailed
         });
       }
-      match state.pg.create_user(&data.name).await {
+      match state.pg.regen_user(&data.name).await {
         Ok(user) => {
-          info!("new user created {}", user.name);
+          info!("user regenned {}", user.name);
           Ok(HttpResponse::Ok().body(user.auth))
         }
         Err(e) => Err(e)
       }
     }
+
     None => Err(LightError {
       r#type: LightErrorType::AuthFailed
     })

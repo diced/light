@@ -1,16 +1,16 @@
 use std::{fs::File, io::Write};
 
 use actix_multipart::Multipart;
-use actix_web::{HttpResponse, web};
+use actix_web::{web, HttpResponse};
 use futures::{StreamExt, TryStreamExt};
 use log::{debug, info};
 
-use crate::{LightState, LightError, LightErrorType, random_chars};
+use crate::{random_chars, LightError, LightErrorType, LightState};
 
 pub async fn upload(
   req: web::HttpRequest,
   state: web::Data<LightState>,
-  mut payload: Multipart,
+  mut payload: Multipart
 ) -> Result<HttpResponse, LightError> {
   let auth_header = req.headers().get("authorization");
   let auth = match auth_header.clone() {
@@ -19,12 +19,12 @@ pub async fn upload(
       .pg
       .check_token(value.to_str().expect("couldn't str auth"))
       .await
-      .unwrap(),
+      .unwrap()
   };
 
   if !auth {
     return Err(LightError {
-      r#type: LightErrorType::AuthFailed,
+      r#type: LightErrorType::AuthFailed
     });
   }
 
@@ -68,11 +68,11 @@ pub async fn upload(
   if file_size == 0 {
     std::fs::remove_file(format!("{}/{}", state.config.uploads_dir, filename))
       .expect("couldn't remove file");
-    
+
     debug!("file {} had no bytes, deleting...", filename);
 
     return Err(LightError {
-      r#type: LightErrorType::NoBytes,
+      r#type: LightErrorType::NoBytes
     });
   }
 
