@@ -29,7 +29,7 @@ And run the executable found in `target/release/light`
 
 # configuration
 
-Provided there is a `light.example.toml` which you should rename to `light.toml`. All values do have [deafault values](#default-config-values).
+Provided there is a `light.example.toml` which you should rename to `light.toml`. All values do have [default values](#default-config-values).
 
 # default config values
 
