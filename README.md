@@ -62,7 +62,7 @@ Make a **POST** request to /api/create_user with a JSON body of the following co
 ```
 
 If the user already exists, then you will receieve an error.
-If the user doesn't exist, then you will receieve your authentication token. Remember to save this, as of now there is no way to regen a token.
+If the user doesn't exist, then you will receieve your authentication token.
 
 ## uploading a file
 
